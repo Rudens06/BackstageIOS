@@ -118,5 +118,5 @@ struct AuthView: View {
 }
 
 #Preview {
-    AuthView()
+  AuthView().environment(AppController())
 }

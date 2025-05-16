@@ -8,56 +8,31 @@
 import SwiftUI
 
 struct EventsView: View {
+  @Environment(AppController.self) private var appController
   @State private var viewModel = EventsViewVM()
-  @State private var isShowingNewEventView = false
+  @State private var isShowingEventFormView = false
+  @State private var editingEvent: Event? = nil
 
   var body: some View {
     NavigationStack {
       ZStack {
         if viewModel.events.isEmpty {
-          VStack {
-            Image(systemName: "calendar.badge.plus")
-              .font(.system(size: 72))
-              .foregroundColor(.blue.opacity(0.5))
-              .padding(.bottom, 16)
-
-            Text("No Events Yet")
-              .font(.title2)
-              .fontWeight(.bold)
-
-            Text("Tap the + button to create your first event")
-              .foregroundColor(.secondary)
-              .multilineTextAlignment(.center)
-              .padding(.horizontal, 32)
-              .padding(.top, 8)
-
-            Button {
-              isShowingNewEventView = true
-            } label: {
-              Text("Create Event")
-                .fontWeight(.semibold)
-                .foregroundColor(.white)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .background(Color.blue)
-                .cornerRadius(10)
-            }
-            .padding(.top, 24)
-          }
+          noEventsView()
         } else {
-          eventsList
+          eventsList()
         }
       }
       .navigationTitle("Events")
       .toolbar {
-        ToolbarItem(placement: .navigationBarTrailing) {
-          Button {
-            isShowingNewEventView = true
-          } label: {
-            Image(systemName: "plus")
+        if appController.isOrganizer() {
+          ToolbarItem(placement: .navigationBarTrailing) {
+            Button {
+              isShowingEventFormView = true
+            } label: {
+              Image(systemName: "plus")
+            }
           }
         }
-
         ToolbarItem(placement: .navigationBarLeading) {
           Button {
             viewModel.fetchEvents()
@@ -66,10 +41,15 @@ struct EventsView: View {
           }
         }
       }
-      .sheet(isPresented: $isShowingNewEventView) {
-        NewEventView(onEventCreated: {
+      .sheet(item: $editingEvent) { event in
+        EventFormView(isEditMode: true, existingEvent: event) {
           viewModel.fetchEvents()
-        })
+        }
+      }
+      .sheet(isPresented: $isShowingEventFormView) {
+        EventFormView(isEditMode: false) {
+          viewModel.fetchEvents()
+        }
       }
       .onAppear {
         viewModel.fetchEvents()
@@ -77,10 +57,16 @@ struct EventsView: View {
     }
   }
 
-  private var eventsList: some View {
+  private func eventsList() -> some View {
     List {
       ForEach(viewModel.events) { event in
-        EventRow(event: event)
+        NavigationLink(destination: EventView(event: event)) {
+          EventRow(
+            event: event,
+            isOrganizer: userIsEventOrganizer(event),
+            onEdit: { editEvent(event) }
+          )
+        }
       }
     }
     .refreshable {
@@ -88,13 +74,62 @@ struct EventsView: View {
     }
   }
 
+  private func noEventsView() -> some View {
+    VStack {
+      Image(systemName: "calendar.badge.plus")
+        .font(.system(size: 72))
+        .foregroundColor(.blue.opacity(0.5))
+        .padding(.bottom, 16)
+
+      Text("No Events Yet")
+        .font(.title2)
+        .fontWeight(.bold)
+      if appController.isOrganizer() {
+        Text("Tap the + button to create your first event")
+          .foregroundColor(.secondary)
+          .multilineTextAlignment(.center)
+          .padding(.horizontal, 32)
+          .padding(.top, 8)
+
+        Button {
+          isShowingEventFormView = true
+        } label: {
+          Text("Create Event")
+            .fontWeight(.semibold)
+            .foregroundColor(.white)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(.blue)
+            .cornerRadius(10)
+        }
+        .padding(.top, 24)
+      }
+    }
+  }
+
   private struct EventRow: View {
     let event: Event
+    let isOrganizer: Bool
+    let onEdit: () -> Void
 
     var body: some View {
       VStack(alignment: .leading, spacing: 8) {
-        Text(event.name)
-          .font(.headline)
+        HStack {
+          Text(event.name)
+            .font(.headline)
+
+          if isOrganizer {
+            Text("Your Event")
+              .font(.caption)
+              .fontWeight(.medium)
+              .foregroundStyle(.white)
+              .padding(.horizontal, 8)
+              .padding(.vertical, 2)
+              .background(Color.orange)
+              .cornerRadius(8)
+          }
+          Spacer()
+        }
 
         Text(formatDate(event.startDate, event.endDate))
           .font(.subheadline)
@@ -103,6 +138,14 @@ struct EventsView: View {
         Text(event.venue)
           .font(.subheadline)
           .foregroundColor(.secondary)
+      }
+      .swipeActions(edge: .leading) {
+        if isOrganizer {
+          Button(action: onEdit) {
+            Label("Edit", systemImage: "pencil")
+          }
+          .tint(.orange)
+        }
       }
       .padding(.vertical, 4)
     }
@@ -131,8 +174,17 @@ struct EventsView: View {
       continuation.resume()
     }
   }
+
+  private func userIsEventOrganizer(_ event: Event) -> Bool {
+    guard let user = appController.user, appController.isOrganizer() else { return false }
+    return event.organizerId == user.id
+  }
+
+  private func editEvent(_ event: Event) {
+    editingEvent = event
+  }
 }
 
 #Preview {
-  EventsView()
+  EventsView().withPreviewEnvironment()
 }

@@ -16,7 +16,7 @@ struct Event: Codable, Identifiable {
   var startDate: TimeInterval
   var endDate: TimeInterval
   var venue: String
-//  var performers: [PerformerInfo]
+  var performers: [String]
 //  var techRequirements: TechRequirements
 //  var status: EventStatus
 //  var bids: [String]?

@@ -14,8 +14,7 @@ struct MainTabView: View {
     TabView {
       switch appControler.user?.userType {
       case .performer:
-        //        PerformerDashboardView()
-        Text("Performer Dashboard")
+        PerformerDashboardView()
           .tabItem {
             Label("Dashboard", systemImage: "music.note")
           }
@@ -26,8 +25,7 @@ struct MainTabView: View {
           }
 
       case .organizer:
-        //        OrganizerDashboardView()
-        Text("Organizer Dashboard")
+        OrganizerDashboardView()
           .tabItem {
             Label("Dashboard", systemImage: "calendar")
           }
@@ -38,7 +36,7 @@ struct MainTabView: View {
           }
 
       case .technician:
-        //        TechnicianDashboardView()
+        TechnicianDashboardView()
         Text("Technician Dashboard")
           .tabItem {
             Label("Dashboard", systemImage: "wrench.and.screwdriver")
@@ -54,10 +52,10 @@ struct MainTabView: View {
         Text("Please log out and log back in")
       }
 
-        EventsView()
-        .tabItem {
-          Label("Events", systemImage: "ticket")
-        }
+      EventsView()
+      .tabItem {
+        Label("Events", systemImage: "ticket")
+      }
 
       ProfileView()
         .tabItem {
@@ -67,6 +65,7 @@ struct MainTabView: View {
     .onAppear() {
       appControler.fetchUser()
     }
+    .tint(.orange)
   }
 }
 

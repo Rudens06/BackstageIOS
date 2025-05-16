@@ -4,6 +4,8 @@ struct ProfileView: View {
   @Environment(AppController.self) private var appControler
   @State private var showingAlert = false
   @State private var alertMessage = ""
+  @State private var isShowingNewPerformerForm = false
+  @State private var editingPerformerProfile: PerformerProfile?
 
   var body: some View {
     Group {
@@ -14,17 +16,35 @@ struct ProfileView: View {
 
             UserInfoCardsView(user: user)
 
-            ActionButtonsView(signOutAction: signOut)
+            ActionButtonsView(
+              showingForm: $isShowingNewPerformerForm,
+              editingPerformerProfile: $editingPerformerProfile,
+              isPerformer: appControler.isPerformer(),
+              signOutAction: signOut
+            ).environment(appControler)
 
             Spacer()
           }
           .padding()
         }
-        .background(Color(.systemGroupedBackground))
       } else {
         LoadingView()
       }
     }
+    .sheet(item: $editingPerformerProfile) { performerProfile in
+      PerformerProfileFormView(
+        isEditMode: true,
+        existingProfile: performerProfile
+      ) {
+        appControler.syncPerformerProfile(userId: appControler.user!.id)
+      }
+    }
+    .sheet(isPresented: $isShowingNewPerformerForm) {
+      if appControler.isPerformer() {
+        PerformerProfileFormView(isEditMode: false)
+      }
+    }
+    .withAppTheme()
     .alert("Notification", isPresented: $showingAlert) {
       Button("OK", role: .cancel) {}
     } message: {
@@ -164,36 +184,49 @@ struct InfoCard: View {
 
 // MARK: - Action Buttons View
 struct ActionButtonsView: View {
+  @Environment(AppController.self) private var appController
+  @Binding var showingForm: Bool
+  @Binding var editingPerformerProfile: PerformerProfile?
+  let isPerformer: Bool
   let signOutAction: () -> Void
 
   var body: some View {
     VStack(spacing: 12) {
-      Button(action: {}) {
-        HStack {
-          Image(systemName: "gear")
-          Text("Settings")
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(
-          RoundedRectangle(cornerRadius: 12)
-            .fill(Color(.systemBackground))
-        )
-        .foregroundColor(.primary)
-      }
 
-      Button(action: {}) {
-        HStack {
-          Image(systemName: "bell")
-          Text("Notifications")
+      if isPerformer {
+        if let performerProfile = appController.performerProfile {
+          Button(action: {
+            editingPerformerProfile = performerProfile
+          }) {
+            HStack {
+              Image(systemName: "music.mic")
+              Text("Edit Performer Profile")
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(
+              RoundedRectangle(cornerRadius: 12)
+                .fill(.orange)
+            )
+            .foregroundColor(.white)
+          }
+        } else {
+          Button(action: {
+            showingForm = true
+          }) {
+            HStack {
+              Image(systemName: "music.mic")
+              Text("Create Performer Profile")
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(
+              RoundedRectangle(cornerRadius: 12)
+                .fill(.orange)
+            )
+            .foregroundColor(.white)
+          }
         }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(
-          RoundedRectangle(cornerRadius: 12)
-            .fill(Color(.systemBackground))
-        )
-        .foregroundColor(.primary)
       }
 
       Divider()
