@@ -29,21 +29,19 @@ struct MainTabView: View {
           .tabItem {
             Label("Dashboard", systemImage: "calendar")
           }
-        //        PerformerListView()
-        Text("Performer List")
+
+        PerformersView()
           .tabItem {
             Label("Performers", systemImage: "person.3")
           }
 
       case .technician:
         TechnicianDashboardView()
-        Text("Technician Dashboard")
           .tabItem {
             Label("Dashboard", systemImage: "wrench.and.screwdriver")
           }
 
-        //        PerformerListView()
-        Text("Performer List")
+        PerformersView()
           .tabItem {
             Label("Performers", systemImage: "person.3")
           }

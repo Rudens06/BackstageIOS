@@ -14,6 +14,7 @@ struct PerformerProfile: Identifiable, Hashable, Codable {
   var description: String
   var memberCount: Int
   var genres: [String]
+  var imageUrl: String?
   var contactEmail: String?
   var contactPhone: String?
   var createdAt: TimeInterval

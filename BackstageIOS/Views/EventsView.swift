@@ -119,14 +119,7 @@ struct EventsView: View {
             .font(.headline)
 
           if isOrganizer {
-            Text("Your Event")
-              .font(.caption)
-              .fontWeight(.medium)
-              .foregroundStyle(.white)
-              .padding(.horizontal, 8)
-              .padding(.vertical, 2)
-              .background(Color.orange)
-              .cornerRadius(8)
+            Bubble(text: "Your Event")
           }
           Spacer()
         }

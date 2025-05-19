@@ -2,8 +2,6 @@ import SwiftUI
 
 struct ProfileView: View {
   @Environment(AppController.self) private var appControler
-  @State private var showingAlert = false
-  @State private var alertMessage = ""
   @State private var isShowingNewPerformerForm = false
   @State private var editingPerformerProfile: PerformerProfile?
 
@@ -35,9 +33,7 @@ struct ProfileView: View {
       PerformerProfileFormView(
         isEditMode: true,
         existingProfile: performerProfile
-      ) {
-        appControler.syncPerformerProfile(userId: appControler.user!.id)
-      }
+      )
     }
     .sheet(isPresented: $isShowingNewPerformerForm) {
       if appControler.isPerformer() {
@@ -45,24 +41,17 @@ struct ProfileView: View {
       }
     }
     .withAppTheme()
-    .alert("Notification", isPresented: $showingAlert) {
-      Button("OK", role: .cancel) {}
-    } message: {
-      Text(alertMessage)
-    }
   }
-  
+
   private func signOut() {
     do {
       try appControler.signOut()
     } catch {
-      alertMessage = "Error signing out: \(error.localizedDescription)"
-      showingAlert = true
+      print("Error signing out: \(error.localizedDescription)")
     }
   }
 }
 
-// MARK: - Profile Header View
 struct ProfileHeaderView: View {
   let user: User
 
@@ -130,15 +119,14 @@ struct ProfileHeaderView: View {
   }
 }
 
-// MARK: - User Info Cards View
 struct UserInfoCardsView: View {
   let user: User
 
   var body: some View {
     VStack(spacing: 16) {
-      InfoCard(icon: "envelope.fill", title: "Email", value: user.email)
+      ProfileInfoCard(icon: "envelope.fill", title: "Email", value: user.email)
 
-      InfoCard(icon: "calendar", title: "Member Since", value: formatDate(from: user.joined))
+      ProfileInfoCard(icon: "calendar", title: "Member Since", value: formatDate(from: user.joined))
     }
   }
 
@@ -150,7 +138,7 @@ struct UserInfoCardsView: View {
   }
 }
 
-struct InfoCard: View {
+struct ProfileInfoCard: View {
   let icon: String
   let title: String
   let value: String
@@ -182,7 +170,6 @@ struct InfoCard: View {
   }
 }
 
-// MARK: - Action Buttons View
 struct ActionButtonsView: View {
   @Environment(AppController.self) private var appController
   @Binding var showingForm: Bool
@@ -249,7 +236,6 @@ struct ActionButtonsView: View {
   }
 }
 
-// MARK: - Loading View
 struct LoadingView: View {
   var body: some View {
     VStack {

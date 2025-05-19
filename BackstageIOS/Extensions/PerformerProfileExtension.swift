@@ -15,7 +15,7 @@ extension PerformerProfile {
             name: "Nova Koma",
             description: "Lokāka latviešu garāžroka grupa",
             memberCount: 4,
-            genres: ["Garāžroks", "Alternatīvais Roks", "R"],
+            genres: ["Garāžroks", "Alternatīvais Roks", "Roks"],
             contactEmail: "nova@koma.com",
             contactPhone: "+37126453685",
             createdAt: Date().timeIntervalSince1970 - 86400,

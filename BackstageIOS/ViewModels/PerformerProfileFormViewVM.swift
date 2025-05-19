@@ -31,10 +31,10 @@ class PerformerProfileFormViewVM {
     patchProfile(profile: profile)
   }
 
-  func createProfile() {
+  func createProfile() -> PerformerProfile? {
     guard let user = appController.user, appController.isPerformer() else {
       print("No logged-in user.")
-      return
+      return nil
     }
 
     let db = Firestore.firestore()
@@ -55,17 +55,19 @@ class PerformerProfileFormViewVM {
     )
 
     docRef.setData(newProfile.asDict())
+    
+    return newProfile
   }
 
-  func updateProfile() {
+  func updateProfile() -> PerformerProfile? {
     guard let user = appController.user else {
       print("No logged-in user.")
-      return
+      return nil
     }
 
     guard let profileId = existingProfileId else {
       print("Can't update profile, no profileId!")
-      return
+      return nil
     }
 
     let db = Firestore.firestore()
@@ -94,6 +96,8 @@ class PerformerProfileFormViewVM {
       "contactPhone": updatedProfile.contactPhone as Any,
       "updatedAt": updatedProfile.updatedAt
     ])
+
+    return updatedProfile
   }
 
   private func patchProfile(profile: PerformerProfile) {

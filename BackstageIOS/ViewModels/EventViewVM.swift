@@ -41,15 +41,13 @@ class EventViewVM {
   var formattedUpdatedDate: String {
     dateFormatter.string(from: Date(timeIntervalSince1970: event.updatedAt))
   }
-  
-  // Helper for organizer avatar
+
   var organizerInitials: String {
     let words = event.organizerName.components(separatedBy: " ")
     let initials = words.prefix(2).compactMap { $0.first }
     return String(initials.prefix(2))
   }
   
-  // Date formatter for metadata
   private var dateFormatter: DateFormatter {
     let formatter = DateFormatter()
     formatter.dateStyle = .medium

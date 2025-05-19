@@ -34,9 +34,12 @@ struct EventView: View {
           .padding(.bottom, 20)
         }
         ScrollView {
-          
           VStack(spacing: 8) {
-            InfoRow(icon: "calendar", title: "Date & Time") {
+            if let url = viewModel.event.imageUrl {
+              eventImage(url: url)
+            }
+
+            InfoCard(icon: "calendar", title: "Date & Time") {
               VStack(alignment: .leading, spacing: 4) {
                 Text(viewModel.dateOnly)
                   .font(.system(size: 16))
@@ -48,20 +51,20 @@ struct EventView: View {
               }
             }
             
-            InfoRow(icon: "mappin.circle", title: "Location") {
+            InfoCard(icon: "mappin.circle", title: "Location") {
               Text(viewModel.event.venue)
             }
             
-            InfoRow(icon: "text.alignleft", title: "Description") {
+            InfoCard(icon: "text.alignleft", title: "Description") {
               Text(viewModel.event.description)
             }
             
-            InfoRow(icon: "person.fill", title: "Organizer") {
+            InfoCard(icon: "person.fill", title: "Organizer") {
               Text(viewModel.event.organizerName)
             }
             
-            InfoRow(icon: "music.mic", title: "Performers") {
-              
+            InfoCard(icon: "music.mic", title: "Performers") {
+
               if !viewModel.event.performers.isEmpty {
                 ForEach(viewModel.event.performers, id: \.self) { performer in
                   Text(performer)
@@ -90,43 +93,26 @@ struct EventView: View {
         }
       }
       .edgesIgnoringSafeArea(.top)
-      .navigationBarTitleDisplayMode(.inline)
     }
   }
-}
 
-struct InfoRow<Content: View>: View {
-  let icon: String
-  let title: String
-  let content: Content
-  
-  var body: some View {
-    VStack(alignment: .leading, spacing: 12) {
-      HStack {
-        Image(systemName: icon)
-          .foregroundColor(.orange)
-          .font(.system(size: 18))
-          .frame(width: 24)
-        
-        Text(title)
-          .font(.headline)
-          .foregroundColor(.primary)
-      }
-      
-      content
-        .padding(.leading, 30)
+  private func eventImage(url: String) -> some View {
+    AsyncImage(url: URL(string: url)) { image in
+      image
+        .resizable()
+        .aspectRatio(contentMode: .fill)
+        .frame(height: 250)
+        .clipped()
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    } placeholder: {
+      Image(systemName: "photo.fill")
+        .font(.system(size: 50))
+        .foregroundColor(.gray)
+        .frame(height: 250)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
-    .padding(16)
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .background(Color(.systemGray6))
-    .cornerRadius(12)
-    .padding(.horizontal, 10)
-  }
-  
-  init(icon: String, title: String, @ViewBuilder content: () -> Content) {
-    self.icon = icon
-    self.title = title
-    self.content = content()
+    .frame(maxWidth: .infinity)
+    .padding(.horizontal, 7)
   }
 }
 
